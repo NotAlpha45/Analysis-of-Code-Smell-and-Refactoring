@@ -1,0 +1,8 @@
+Sonarqube Token : sqp_2d92763dccbe484e3ca1d7f9ada63af2ac83b710
+Project Key1 : Vant
+
+Command to run sonar-qube (For Vant) : sonar-scanner -D sonar.projectBaseDir="C:\SWE Class\Github Desktop\TestProjects\vant" -D sonar.projectKey=Vant -D sonar.projectName=Vant -D sonar.login=sqp_2d92763dccbe484e3ca1d7f9ada63af2ac83b710
+
+Command to checkout to a version : git checkout tags/<version name>
+
+Command to get metrics from sonarqube (For Project Key named Vant) : curl.exe "http://localhost:9000/api/measures/component?component={Vant}&metricKeys=complexity,ncloc,violations, code_smells" (Server runs on localhost:9000)
