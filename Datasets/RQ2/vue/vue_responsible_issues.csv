@@ -1,0 +1,2 @@
+version,date,timestamp,security_issues_low,reliability_issues_low,maintainability_issues_low,total_debt_low,security_issues_medium,reliability_issues_medium,maintainability_issues_medium,total_debt_medium,security_issues_high,reliability_issues_high,maintainability_issues_high,total_debt_high
+0.6.0,2013-12-07,1386462737,0,0,0,0,0,0,0,0,0,0,0,0
