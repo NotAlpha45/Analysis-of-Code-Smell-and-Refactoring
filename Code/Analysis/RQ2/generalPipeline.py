@@ -1,104 +1,65 @@
-{
- "cells": [
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "### A general pipeline to perform the necessary operations to generate a combined clean dataframe"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "import numpy as np\n",
-    "import pandas as pd\n",
-    "\n",
-    "def process_dataframes(df_adapt, df_consis, df_intention):\n",
-    "    columns_to_drop = ['security_issues_low', 'reliability_issues_low', 'maintainability_issues_low',\n",
-    "                       'security_issues_medium', 'reliability_issues_medium', 'maintainability_issues_medium',\n",
-    "                       'security_issues_high', 'reliability_issues_high', 'maintainability_issues_high']\n",
-    "    \n",
-    "    columns_to_rename = ['total_debt_low', 'total_debt_medium', 'total_debt_high']\n",
-    "    \n",
-    "    df_adapt = df_adapt.drop(columns_to_drop, axis=1)\n",
-    "    df_consis = df_consis.drop(columns_to_drop, axis=1)\n",
-    "    df_intention = df_intention.drop(columns_to_drop, axis=1)\n",
-    "\n",
-    "\n",
-    "\n",
-    "    def total_sum_of_debt(df, column_name):\n",
-    "        column_name = column_name + '_total_debt'\n",
-    "        df[column_name] = df[['total_debt_low', 'total_debt_medium', 'total_debt_high']].sum(axis=1)\n",
-    "        return df\n",
-    "\n",
-    "    df_adapt = total_sum_of_debt(df_adapt, 'adaptability')\n",
-    "    df_consis = total_sum_of_debt(df_consis, 'consistency')\n",
-    "    df_intention = total_sum_of_debt(df_intention, 'intentionality')\n",
-    "\n",
-    "\n",
-    "\n",
-    "    def debt_diff(df, column_name):\n",
-    "        new_column_name = column_name + '_total_debt_difference_with_previous_version'\n",
-    "        df[new_column_name] = df[column_name + '_total_debt'].diff()\n",
-    "        df[new_column_name].iloc[0] = df[column_name + '_total_debt'].iloc[0]\n",
-    "        return df\n",
-    "\n",
-    "    df_adapt = debt_diff(df_adapt, 'adaptability')\n",
-    "    df_consis = debt_diff(df_consis, 'consistency')\n",
-    "    df_intention = debt_diff(df_intention, 'intentionality')\n",
-    "\n",
-    "\n",
-    "\n",
-    "    def rename_columns(df, column_names, prefix):\n",
-    "        for column_name in column_names:\n",
-    "            df = df.rename(columns={column_name: prefix + '_' + column_name})\n",
-    "        return df\n",
-    "\n",
-    "    df_adapt = rename_columns(df_adapt, columns_to_rename, 'adaptability')\n",
-    "    df_consis = rename_columns(df_consis, columns_to_rename, 'consistency')\n",
-    "    df_intention = rename_columns(df_intention, columns_to_rename, 'intentionality')\n",
-    "\n",
-    "\n",
-    "    def process_versions(df):\n",
-    "        df['version'] = df['version'].str.replace('v', '')\n",
-    "        df['version'] = df['version'].apply(lambda x: 'v' + x)\n",
-    "        return df\n",
-    "\n",
-    "    df_adapt = process_versions(df_adapt)\n",
-    "    df_consis = process_versions(df_consis)\n",
-    "    df_intention = process_versions(df_intention)\n",
-    "\n",
-    "\n",
-    "    df_combined = pd.concat([df_adapt, df_consis, df_intention], axis=1)\n",
-    "    df_combined = df_combined.T.drop_duplicates().T\n",
-    "\n",
-    "\n",
-    "    return df_combined"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "venv",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.11.7"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 2
-}
+import numpy as np
+import pandas as pd
+
+
+def process_dataframes(df_adapt, df_consis, df_intention):
+    columns_to_drop = ['security_issues_low', 'reliability_issues_low', 'maintainability_issues_low',
+                       'security_issues_medium', 'reliability_issues_medium', 'maintainability_issues_medium',
+                       'security_issues_high', 'reliability_issues_high', 'maintainability_issues_high']
+    
+    columns_to_rename = ['total_debt_low', 'total_debt_medium', 'total_debt_high']
+    
+    df_adapt = df_adapt.drop(columns_to_drop, axis=1)
+    df_consis = df_consis.drop(columns_to_drop, axis=1)
+    df_intention = df_intention.drop(columns_to_drop, axis=1)
+
+
+
+    def total_sum_of_debt(df, column_name):
+        column_name = column_name + '_total_debt'
+        df[column_name] = df[['total_debt_low', 'total_debt_medium', 'total_debt_high']].sum(axis=1)
+        return df
+
+    df_adapt = total_sum_of_debt(df_adapt, 'adaptability')
+    df_consis = total_sum_of_debt(df_consis, 'consistency')
+    df_intention = total_sum_of_debt(df_intention, 'intentionality')
+
+
+
+    def debt_diff(df, column_name):
+        new_column_name = column_name + '_total_debt_difference_with_previous_version'
+        df[new_column_name] = df[column_name + '_total_debt'].diff()
+        df[new_column_name].iloc[0] = df[column_name + '_total_debt'].iloc[0]
+        return df
+
+    df_adapt = debt_diff(df_adapt, 'adaptability')
+    df_consis = debt_diff(df_consis, 'consistency')
+    df_intention = debt_diff(df_intention, 'intentionality')
+
+
+
+    def rename_columns(df, column_names, prefix):
+        for column_name in column_names:
+            df = df.rename(columns={column_name: prefix + '_' + column_name})
+        return df
+
+    df_adapt = rename_columns(df_adapt, columns_to_rename, 'adaptability')
+    df_consis = rename_columns(df_consis, columns_to_rename, 'consistency')
+    df_intention = rename_columns(df_intention, columns_to_rename, 'intentionality')
+
+
+    def process_versions(df):
+        df['version'] = df['version'].str.replace('v', '')
+        df['version'] = df['version'].apply(lambda x: 'v' + x)
+        return df
+
+    df_adapt = process_versions(df_adapt)
+    df_consis = process_versions(df_consis)
+    df_intention = process_versions(df_intention)
+
+
+    df_combined = pd.concat([df_adapt, df_consis, df_intention], axis=1)
+    df_combined = df_combined.T.drop_duplicates().T
+
+
+    return df_combined
