@@ -4,12 +4,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "### A general pipeline to perform the necessary operations (mathematical calculations)"
+    "### A general pipeline to perform the necessary operations to generate a combined clean dataframe"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 1,
+   "execution_count": 2,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -63,8 +63,8 @@
     "\n",
     "\n",
     "    def process_versions(df):\n",
-    "        df['versions'] = df['versions'].str.replace('v', '')\n",
-    "        df['versions'] = df['versions'].apply(lambda x: 'v' + x)\n",
+    "        df['version'] = df['version'].str.replace('v', '')\n",
+    "        df['version'] = df['version'].apply(lambda x: 'v' + x)\n",
     "        return df\n",
     "\n",
     "    df_adapt = process_versions(df_adapt)\n",
