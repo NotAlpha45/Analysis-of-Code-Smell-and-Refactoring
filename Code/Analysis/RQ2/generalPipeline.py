@@ -2,7 +2,18 @@ import numpy as np
 import pandas as pd
 
 
-def process_dataframes(df_adapt, df_consis, df_intention):
+def process_dataframes(JSlibraryName, df_adapt, df_consis, df_intention):
+
+    def sortDataframeByReleaseDate(df_adapt, df_consis, df_intention):
+        df_adapt = df_adapt.sort_values(by=['date'])
+        df_consis = df_consis.sort_values(by=['date'])
+        df_intention = df_intention.sort_values(by=['date'])
+        return df_adapt, df_consis, df_intention
+    
+    df_adapt, df_consis, df_intention = sortDataframeByReleaseDate(df_adapt, df_consis, df_intention)
+
+
+
     columns_to_drop = ['security_issues_low', 'reliability_issues_low', 'maintainability_issues_low',
                        'security_issues_medium', 'reliability_issues_medium', 'maintainability_issues_medium',
                        'security_issues_high', 'reliability_issues_high', 'maintainability_issues_high']
@@ -16,7 +27,7 @@ def process_dataframes(df_adapt, df_consis, df_intention):
 
 
     def total_sum_of_debt(df, column_name):
-        column_name = column_name + '_total_debt'
+        column_name = column_name + '_total_debt_of_' + JSlibraryName
         df[column_name] = df[['total_debt_low', 'total_debt_medium', 'total_debt_high']].sum(axis=1)
         return df
 
@@ -27,9 +38,9 @@ def process_dataframes(df_adapt, df_consis, df_intention):
 
 
     def debt_diff(df, column_name):
-        new_column_name = column_name + '_total_debt_difference_with_previous_version'
-        df[new_column_name] = df[column_name + '_total_debt'].diff()
-        df[new_column_name].iloc[0] = df[column_name + '_total_debt'].iloc[0]
+        new_column_name = column_name + '_total_debt_difference_with_previous_version_of_' + JSlibraryName
+        df[new_column_name] = df[column_name + '_total_debt_of_' + JSlibraryName].diff()
+        df[new_column_name].iloc[0] = df[column_name + '_total_debt_of_' + JSlibraryName].iloc[0]
         return df
 
     df_adapt = debt_diff(df_adapt, 'adaptability')
@@ -40,7 +51,7 @@ def process_dataframes(df_adapt, df_consis, df_intention):
 
     def rename_columns(df, column_names, prefix):
         for column_name in column_names:
-            df = df.rename(columns={column_name: prefix + '_' + column_name})
+            df = df.rename(columns={column_name: prefix + '_' + column_name + '_of_' + JSlibraryName})
         return df
 
     df_adapt = rename_columns(df_adapt, columns_to_rename, 'adaptability')
@@ -61,5 +72,10 @@ def process_dataframes(df_adapt, df_consis, df_intention):
     df_combined = pd.concat([df_adapt, df_consis, df_intention], axis=1)
     df_combined = df_combined.T.drop_duplicates().T
 
+    def rename_columns_of_combined_df(df):
+        df = df.rename(columns={'version': 'version_of_' + JSlibraryName, 'date': 'date_of_' + JSlibraryName, 'timestamp': 'timestamp_of_' + JSlibraryName})
+        return df
+
+    df_combined = rename_columns_of_combined_df(df_combined)
 
     return df_combined
