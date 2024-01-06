@@ -7,7 +7,8 @@ import seaborn as sns
 
 def column_to_title(column_name):
     words = column_name.split('_')
-    title_words = [word.capitalize() for word in words[:-2]]
+    words = [word for word in words if word not in ['total', 'debt']]
+    title_words = [word.capitalize() for word in words[:-1]]
     title_words.append('of')
     title_words.append(words[-1].capitalize())
     return ' '.join(title_words)
@@ -17,7 +18,7 @@ def plot_control_charts(df, combined_columns, versions):
     num_cols = len(versions)
     num_rows = math.ceil(num_plots / num_cols)
 
-    fig, axs = plt.subplots(num_rows, num_cols, figsize=(10*num_cols, 10*num_rows))
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=(24, 12*num_rows))
 
     # If there's only one row, axs is a 1D array
     if num_rows == 1:
