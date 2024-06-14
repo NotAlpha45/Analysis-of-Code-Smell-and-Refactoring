@@ -237,7 +237,6 @@ class DataExtractionPipeline:
             text=True,
             shell=True,
         )
-        print(result.stdout.strip())
         print("SonarQube scan completed for tag:", tag)
 
     def __get_metrics(self) -> dict:
@@ -247,6 +246,7 @@ class DataExtractionPipeline:
         Returns:
         dict: A dictionary containing the metrics for the specified repository.
         """
+        print("Getting metrics from SonarQube")
         result = sp.run(
             [
                 "curl.exe",
@@ -257,7 +257,9 @@ class DataExtractionPipeline:
             text=True,
             # shell=True,
         )
-        return json.loads(result.stdout)
+        print(result)
+        print("Metrics received from SonarQube")
+        return json.loads(result)
 
     def __get_metrics_from_version_tags(self, tag: str, date: str, timestamp: int):
 
