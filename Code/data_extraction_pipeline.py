@@ -123,7 +123,9 @@ class DataExtractionPipeline:
 
         return tag_list
 
-    def __get_tag_and_timestamp(self) -> list[tuple[str, str, int]]:
+    def __get_tag_and_timestamp(
+        self, max_output: int | None = 20
+    ) -> list[tuple[str, str, int]]:
         """
         This function returns a list of tuples containing the tag, release date and timestamp of the tag from the
         prespecified repository.
@@ -134,7 +136,7 @@ class DataExtractionPipeline:
 
         """
         repo_path = self.repo_path
-        tag_list = self.__get_tag_list(repo_path, None)
+        tag_list = self.__get_tag_list(max_output=max_output)
         tag_and_timestamp = []
 
         for tag in tag_list:
@@ -345,7 +347,7 @@ class DataExtractionPipeline:
                 timestamp
             )
 
-            for severity in severities:
+            for severity in self.__severities:
                 (
                     total_security_issues,
                     total_reliability_issues,
@@ -370,3 +372,19 @@ class DataExtractionPipeline:
                 self.__clean_code_attribute_dict[clean_code_category][
                     f"total_debt_{severity.lower()}"
                 ].append(total_debt)
+
+    def get_metrics_data(
+        self, max_tags: int | None = 20, max_tags_per_year: int | None = 5
+    ):
+        tag_and_timestamp = self.__get_tag_and_timestamp(max_output=max_tags)
+        version_tags = self.__get_version_tags_by_year(
+            tag_and_timestamp, max_per_year=max_tags_per_year
+        )
+
+        for tag, date, timestamp in version_tags:
+            self.__checkout_to_tag(tag)
+            self.__sonar_scan(tag)
+            self.__get_metrics_from_version_tags(tag, date, timestamp)
+            self.__extract_clean_code_data(tag, date, timestamp)
+
+        return self.__metrics_dict, self.__clean_code_attribute_dict
