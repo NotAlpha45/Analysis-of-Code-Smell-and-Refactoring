@@ -242,6 +242,7 @@ class DataExtractionPipeline:
         """
 
         print("Getting metrics from SonarQube")
+
         url = f"{self.sonarqube_url}/api/measures/component"
         params = {
             "component": self.repo_name,
@@ -249,7 +250,7 @@ class DataExtractionPipeline:
         }
 
         response = requests.get(url, params=params)
-        print(response)
+        print("Metrics API response: ", response)
         result = response.json()
         print("Metrics received from SonarQube")
 
@@ -280,9 +281,11 @@ class DataExtractionPipeline:
         params = {"cleanCodeAttributeCategories": clean_code_category}
 
         response = requests.get(url, params=params)
+        print("Quality Issues API response: ", response)
+
         result = response.json()
 
-        issues_list = json.loads(result.stdout)["issues"]
+        issues_list = result["issues"]
 
         # Get the software quality, maintainability and debt from the issues list
         filtered_issues_list = [
