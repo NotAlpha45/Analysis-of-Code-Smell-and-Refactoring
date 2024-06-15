@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 import subprocess as sp
 from utils import time_str_to_minutes
+import requests
 
 load_dotenv()
 
@@ -50,7 +51,6 @@ class DataExtractionPipeline:
             "duplicated_lines_density",
             # Issues
             "violations",
-            "new_violations",
             "blocker_violations",
             "critical_violations",
             "major_violations",
@@ -58,23 +58,17 @@ class DataExtractionPipeline:
             "false_positive_issues",
             # Maintainability
             "code_smells",
-            "new_code_smells",
-            "squale_index",
+            "sqale_index",
             "sqale_rating",
-            "new_technical_debt",
             "sqale_debt_ratio",
             # Reliability
             "bugs",
-            "new_bugs",
             "reliability_rating",
             "reliability_remediation_effort",
-            "new_reliability_remediation_effort",
             # Security
             "vulnerabilities",
-            "new_vulnerabilities",
             "security_rating",
             "security_remediation_effort",
-            "new_security_remediation_effort",
             "security_hotspots",
             "security_review_rating",
             # Size
@@ -208,7 +202,7 @@ class DataExtractionPipeline:
             check=True,
             text=True,
         )
-        print("Ckeckedout to tag:", tag)
+        print("Checkedout to tag:", tag)
 
     def __sonar_scan(self, tag: str):
         """
@@ -246,20 +240,20 @@ class DataExtractionPipeline:
         Returns:
         dict: A dictionary containing the metrics for the specified repository.
         """
+
         print("Getting metrics from SonarQube")
-        result = sp.run(
-            [
-                "curl.exe",
-                f"{self.sonarqube_url}/api/measures/component?component={self.repo_name}&metricKeys={self.__code_metrics_query_string}",
-            ],
-            capture_output=True,
-            check=True,
-            text=True,
-            # shell=True,
-        )
-        print(result)
+        url = f"{self.sonarqube_url}/api/measures/component"
+        params = {
+            "component": self.repo_name,
+            "metricKeys": self.__code_metrics_query_string,
+        }
+
+        response = requests.get(url, params=params)
+        print(response)
+        result = response.json()
         print("Metrics received from SonarQube")
-        return json.loads(result)
+
+        return result
 
     def __get_metrics_from_version_tags(self, tag: str, date: str, timestamp: int):
 
@@ -282,16 +276,11 @@ class DataExtractionPipeline:
         A tuple of (total_security_issues, total_reliability_issues, total_maintainability_issues, total_debt)
         """
 
-        result = sp.run(
-            [
-                "curl.exe",
-                f"{self.sonarqube_url}/api/issues/search?cleanCodeAttributeCategories={clean_code_category}",
-            ],
-            capture_output=True,
-            check=True,
-            text=True,
-            # shell=True,
-        )
+        url = f"{self.sonarqube_url}/api/issues/search"
+        params = {"cleanCodeAttributeCategories": clean_code_category}
+
+        response = requests.get(url, params=params)
+        result = response.json()
 
         issues_list = json.loads(result.stdout)["issues"]
 
