@@ -370,15 +370,30 @@ class DataExtractionPipeline:
     def get_metrics_data(
         self, max_tags: int | None = 20, max_tags_per_year: int | None = 5
     ):
+        """
+        Fetches the metrics data from SonarQube for the specified repository.
+
+        Parameters:
+        max_tags (int): The maximum number of tags to be considered. If None, all tags are considered.
+        max_tags_per_year (int): The maximum number of tags to be considered per year. If None, all tags are considered.
+
+        Returns:
+        dict, dict: A dictionary containing the metrics data and a dictionary containing the clean code data.
+
+        """
         tag_and_timestamp = self.__get_tag_and_timestamp(max_output=max_tags)
         version_tags = self.__get_version_tags_by_year(
             tag_and_timestamp, max_per_year=max_tags_per_year
         )
 
         for tag, date, timestamp in version_tags:
-            self.__checkout_to_tag(tag)
-            self.__sonar_scan(tag)
-            self.__get_metrics_from_version_tags(tag, date, timestamp)
-            self.__extract_clean_code_data(tag, date, timestamp)
+            try:
+                self.__checkout_to_tag(tag)
+                self.__sonar_scan(tag)
+                self.__get_metrics_from_version_tags(tag, date, timestamp)
+                self.__extract_clean_code_data(tag, date, timestamp)
+            except ChildProcessError:
+                print("Error in running SonarQube scan for tag:", tag)
+                continue
 
         return self.__metrics_dict, self.__clean_code_attribute_dict
