@@ -6,6 +6,7 @@ import os
 import subprocess as sp
 from utils import time_str_to_minutes
 import requests
+from subprocess import CalledProcessError
 
 load_dotenv()
 
@@ -392,7 +393,7 @@ class DataExtractionPipeline:
                 self.__sonar_scan(tag)
                 self.__get_metrics_from_version_tags(tag, date, timestamp)
                 self.__extract_clean_code_data(tag, date, timestamp)
-            except ChildProcessError:
+            except CalledProcessError:
                 print("Error in running SonarQube scan for tag:", tag)
                 continue
 
