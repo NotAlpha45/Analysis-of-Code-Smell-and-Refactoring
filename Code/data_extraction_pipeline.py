@@ -18,12 +18,16 @@ class DataExtractionPipeline:
         sonarqube_token: str = "",
         repo_name: str = "",
         repo_path: str = "",
+        from_year: int | None = None,
+        to_year: int | None = None,
     ):
         # Parameters for the Data Extraction Pipeline
         self.sonarqube_url = sonarqube_url
         self.sonarqube_token = sonarqube_token
         self.repo_name = repo_name
         self.repo_path = repo_path
+        self.from_year = from_year
+        self.to_year = to_year
 
         # Constants for the Data Extraction Pipeline
         self.__clean_code_attribute_categories = [
@@ -119,7 +123,8 @@ class DataExtractionPipeline:
         return tag_list
 
     def __get_tag_and_timestamp(
-        self, max_output: int | None = 20
+        self,
+        max_output: int | None = 20,
     ) -> list[tuple[str, str, int]]:
         """
         This function returns a list of tuples containing the tag, release date and timestamp of the tag from the
@@ -146,7 +151,22 @@ class DataExtractionPipeline:
             date, timestamp = result.stdout.strip().split()
             tag_and_timestamp.append((tag, date, int(timestamp)))
             # print(result.stdout.strip())
-        return tag_and_timestamp
+
+        tag_and_timestamp_filtered = []
+
+        for tag, date, timestamp in tag_and_timestamp:
+            year = int(date.split("-")[0])
+            if self.from_year is not None and year < self.from_year:
+                continue
+            if self.to_year is not None and year > self.to_year:
+                continue
+            tag_and_timestamp_filtered.append((tag, date, timestamp))
+
+        return (
+            tag_and_timestamp
+            if self.from_year is None and self.to_year is None
+            else tag_and_timestamp_filtered
+        )
 
     def __get_version_tags_by_year(
         self, data: list[tuple[str, str, int]], max_per_year: int | None = 5
