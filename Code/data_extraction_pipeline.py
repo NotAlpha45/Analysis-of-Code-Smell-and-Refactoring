@@ -288,6 +288,8 @@ class DataExtractionPipeline:
         for metric in metrics_result["component"]["measures"]:
             self.__metrics_dict[metric["metric"]].append(metric["value"])
 
+        print(f"Metrics data extracted for {tag = }, {date = }, {timestamp = }")
+
         return self.__metrics_dict
 
     def __get_quality_issue_values_from_api(
@@ -388,6 +390,8 @@ class DataExtractionPipeline:
                     f"total_debt_{severity.lower()}"
                 ].append(total_debt)
 
+            print(f"Clean code data extracted for {tag = }, {date = }, {timestamp = }")
+
     def get_metrics_data(
         self, max_tags: int | None = 20, max_tags_per_year: int | None = 5
     ):
@@ -408,6 +412,7 @@ class DataExtractionPipeline:
         )
 
         for tag, date, timestamp in version_tags:
+            print(f"Processing {tag = }, {date = }, {timestamp = }")
             try:
                 self.__checkout_to_tag(tag)
                 self.__sonar_scan(tag)
@@ -416,5 +421,6 @@ class DataExtractionPipeline:
             except CalledProcessError:
                 print("Error in running SonarQube scan for tag:", tag)
                 continue
+            print("Process Completed for", tag, "\n \n")
 
         return self.__metrics_dict, self.__clean_code_attribute_dict
