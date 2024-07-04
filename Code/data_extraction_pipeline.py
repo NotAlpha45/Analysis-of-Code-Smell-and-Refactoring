@@ -4,6 +4,7 @@ import json
 from dotenv import load_dotenv
 import os
 import subprocess as sp
+from Code.utils.validation_utils import validate_version_tag
 from utils import time_str_to_minutes
 import requests
 from subprocess import CalledProcessError
@@ -412,15 +413,16 @@ class DataExtractionPipeline:
         )
 
         for tag, date, timestamp in version_tags:
-            print(f"Processing {tag = }, {date = }, {timestamp = }")
-            try:
-                self.__checkout_to_tag(tag)
-                self.__sonar_scan(tag)
-                self.__get_metrics_from_version_tags(tag, date, timestamp)
-                self.__extract_clean_code_data(tag, date, timestamp)
-            except CalledProcessError:
-                print("Error in running SonarQube scan for tag:", tag)
-                continue
-            print("Process Completed for", tag, "\n \n")
+            if validate_version_tag(tag):
+                print(f"Processing {tag = }, {date = }, {timestamp = }")
+                try:
+                    self.__checkout_to_tag(tag)
+                    self.__sonar_scan(tag)
+                    self.__get_metrics_from_version_tags(tag, date, timestamp)
+                    self.__extract_clean_code_data(tag, date, timestamp)
+                except CalledProcessError:
+                    print("Error in running SonarQube scan for tag:", tag)
+                    continue
+                print("Process Completed for", tag, "\n \n")
 
         return self.__metrics_dict, self.__clean_code_attribute_dict
