@@ -4,7 +4,7 @@ import json
 from dotenv import load_dotenv
 import os
 import subprocess as sp
-from Code.utils.validation_utils import validate_version_tag
+from utils.validation_utils import validate_version_tag
 from utils import time_str_to_minutes
 import requests
 from subprocess import CalledProcessError
